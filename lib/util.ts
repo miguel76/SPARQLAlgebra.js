@@ -210,6 +210,8 @@ export default class Util
                 recurseOp(group.input);
                 group.aggregates.forEach(recurseOp);
                 break;
+            case types.INPUT:
+                break;
             case types.INV:
                 const inv: A.Inv = <A.Inv> result;
                 recurseOp(inv.path);
@@ -378,6 +380,9 @@ export default class Util
                     mapOp(group.input),
                     [].concat(group.variables),
                     <A.BoundAggregate[]> group.aggregates.map(mapOp));
+            case types.INPUT:
+                const input: A.Input = <A.Input> result;
+                return factory.createInput(input.name);
             case types.INV:
                 const inv: A.Inv = <A.Inv> result;
                 return factory.createInv(mapOp(inv.path));

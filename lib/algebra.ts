@@ -19,6 +19,7 @@ export const types = Object.freeze({
     FROM:               'from',
     GRAPH:              'graph',
     GROUP:              'group',
+    INPUT:              'input',
     INV:                'inv',
     JOIN:               'join',
     LEFT_JOIN:          'leftjoin',
@@ -214,6 +215,12 @@ export interface Group extends Single
     type: 'group';
     variables: rdfjs.Variable[];
     aggregates: BoundAggregate[];
+}
+
+export interface Input extends Operation
+{
+    type: 'input';
+    name: String;
 }
 
 export interface Inv extends Operation, PropertyPathSymbol

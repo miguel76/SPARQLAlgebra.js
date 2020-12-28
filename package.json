@@ -1,12 +1,12 @@
 {
-  "name": "sparqlalgebrajs",
+  "name": "sparqlalgebrajs-input",
   "version": "2.4.0",
   "description": "Convert SPARQL to SPARQL algebra",
-  "author": "Joachim Van Herwegen",
+  "author": "Miguel Ceriani <miguel.ceriani@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/joachimvh/SPARQLAlgebra.js"
+    "url": "https://github.com/miguel76/SPARQLAlgebra.js"
   },
   "bin": "./bin/sparqlalgebrajs.js",
   "dependencies": {
@@ -14,7 +14,7 @@
     "minimist": "^1.2.5",
     "rdf-data-factory": "^1.0.0",
     "rdf-string": "^1.5.0",
-    "sparqljs": "^3.1.1"
+    "sparqljs-input": "^3.2.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",
@@ -23,7 +23,7 @@
     "@types/node": "^13.9.1",
     "@types/rdf-js": "^4.0.0",
     "chai": "^4.2.0",
-    "mocha": "^8.0.0",
+    "mocha": "^8.2.1",
     "nyc": "^15.0.0",
     "pre-commit": "^1.2.2",
     "ts-node": "^9.0.0",

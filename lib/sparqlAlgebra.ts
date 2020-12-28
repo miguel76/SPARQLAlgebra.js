@@ -6,7 +6,7 @@ import * as equal from 'fast-deep-equal';
 import * as RDF from 'rdf-js'
 import {termToString} from 'rdf-string';
 
-const Parser = require('sparqljs').Parser;
+const Parser = require('sparqljs-input').Parser;
 const types = Algebra.types;
 
 let variables = new Set<string>();
@@ -437,6 +437,11 @@ function accumulateGroupGraphPattern(G: Algebra.Operation, E: any) : Algebra.Ope
         // transform to group so childnodes get parsed correctly
         E.type = 'group';
         let A = factory.createService(translateGroupGraphPattern(E), E.name, E.silent);
+        G = simplifiedJoin(G, A);
+    }
+    else if (E.type === 'input')
+    {
+        let A = factory.createInput(E.name);
         G = simplifiedJoin(G, A);
     }
     else

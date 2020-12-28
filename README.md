@@ -1,6 +1,7 @@
 # SPARQL to SPARQL Algebra converter
-[![npm version](https://badge.fury.io/js/sparqlalgebrajs.svg)](https://www.npmjs.com/package/sparqlalgebrajs)
-[![Build Status](https://travis-ci.org/joachimvh/SPARQLAlgebra.js.svg?branch=master)](https://travis-ci.org/joachimvh/SPARQLAlgebra.js) 
+
+Fork of the original [SPARQLAlgebra.js](https://github.com/joachimvh/SPARQLAlgebra.js), supporting an extension to SPARQL 1.1 syntax and algebra,
+namely input patterns.
 
 2 components get exposed: the **translate** function and the **Algebra** object,
 which contains all the output types that can occur.

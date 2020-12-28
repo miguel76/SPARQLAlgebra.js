@@ -5,8 +5,8 @@ import Factory from './factory';
 import Util from './util';
 import {termToString} from 'rdf-string';
 import {Wildcard} from "./wildcard";
-const SparqlGenerator = require('sparqljs').Generator;
-const Wildcard = require('sparqljs').Wildcard;
+const SparqlGenerator = require('sparqljs-input').Generator;
+const Wildcard = require('sparqljs-input').Wildcard;
 const types = Algebra.types;
 const eTypes = Algebra.expressionTypes;
 
@@ -56,6 +56,7 @@ function translateOperation(op: Algebra.Operation): any
         case types.FILTER:    return translateFilter(<Algebra.Filter>op);
         case types.GRAPH:     return translateGraph(<Algebra.Graph>op);
         case types.GROUP:     return translateGroup(<Algebra.Group>op);
+        case types.INPUT:     return translateInput(<Algebra.Input>op);
         case types.JOIN:      return translateJoin(<Algebra.Join>op);
         case types.LEFT_JOIN: return translateLeftJoin(<Algebra.LeftJoin>op);
         case types.MINUS:     return translateMinus(<Algebra.Minus>op);
@@ -286,6 +287,14 @@ function translateGroup(op: Algebra.Group): any
     context.group.push(...op.variables);
 
     return input;
+}
+
+function translateInput(op: Algebra.Input): any
+{
+    return {
+        type: 'input',
+        name: op.name
+    }
 }
 
 function translateJoin(op: Algebra.Join): any
