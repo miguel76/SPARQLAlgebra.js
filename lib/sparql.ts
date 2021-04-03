@@ -293,7 +293,8 @@ function translateInput(op: Algebra.Input): any
 {
     return {
         type: 'input',
-        name: op.name
+        name: op.name,
+        varMap: op.varMap
     }
 }
 

@@ -220,7 +220,8 @@ export interface Group extends Single
 export interface Input extends Operation
 {
     type: 'input';
-    name: String;
+    name: string;
+    varMap: {[key: string] : rdfjs.Variable};
 }
 
 export interface Inv extends Operation, PropertyPathSymbol

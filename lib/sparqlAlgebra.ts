@@ -441,7 +441,7 @@ function accumulateGroupGraphPattern(G: Algebra.Operation, E: any) : Algebra.Ope
     }
     else if (E.type === 'input')
     {
-        let A = factory.createInput(E.name);
+        let A = factory.createInput(E.name, E.varMap);
         G = simplifiedJoin(G, A);
     }
     else

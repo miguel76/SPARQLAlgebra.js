@@ -32,7 +32,7 @@ export default class Factory
     createFilter (input: A.Operation, expression: A.Expression) : A.Filter { return { type: 'filter', input, expression }; }
     createGraph (input: A.Operation, name: RDF.Term) : A.Graph { return { type: 'graph', input, name }; }
     createGroup (input: A.Operation, variables: RDF.Variable[], aggregates: A.BoundAggregate[]) : A.Group { return { type: 'group', input, variables, aggregates }; }
-    createInput (name: String): A.Input { return { type: 'input', name }; }
+    createInput (name: string, varMap: {[key:string]: RDF.Variable}): A.Input { return { type: 'input', name, varMap }; }
     createInv (path: A.PropertyPathSymbol): A.Inv { return { type: 'inv', path }; }
     createJoin (left: A.Operation, right: A.Operation): A.Join { return { type: 'join', left, right }; }
     createLeftJoin (left: A.Operation, right: A.Operation, expression?: A.Expression): A.LeftJoin

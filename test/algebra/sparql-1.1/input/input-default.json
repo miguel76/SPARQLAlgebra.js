@@ -4,7 +4,13 @@
     "type": "join",
     "left": {
       "type": "input",
-      "name": "_"
+      "name": "_",
+      "varMap": {
+        "_": {
+          "termType": "Variable",
+          "value": "_"
+        }
+      }
     },
     "right": {
       "type": "bgp",
@@ -12,7 +18,7 @@
         {
           "subject": {
             "termType": "Variable",
-            "value": "book"
+            "value": "_"
           },
           "predicate": {
             "termType": "NamedNode",
@@ -31,7 +37,7 @@
         {
           "subject": {
             "termType": "Variable",
-            "value": "book"
+            "value": "_"
           },
           "predicate": {
             "termType": "NamedNode",
@@ -53,7 +59,7 @@
   "variables": [
     {
       "termType": "Variable",
-      "value": "book"
+      "value": "_"
     },
     {
       "termType": "Variable",

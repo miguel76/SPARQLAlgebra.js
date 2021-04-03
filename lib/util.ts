@@ -84,6 +84,12 @@ export default class Util
                 group.variables.forEach(addVariable);
                 return true;
             },
+            [types.INPUT]: (op) =>
+            {
+                let input = <A.Input>op;
+                Object.values(input.varMap).forEach(addVariable);
+                return true;
+            },
             [types.PATH]: (op) =>
             {
                 let path = <A.Path>op;
@@ -382,7 +388,7 @@ export default class Util
                     <A.BoundAggregate[]> group.aggregates.map(mapOp));
             case types.INPUT:
                 const input: A.Input = <A.Input> result;
-                return factory.createInput(input.name);
+                return factory.createInput(input.name, input.varMap);
             case types.INV:
                 const inv: A.Inv = <A.Inv> result;
                 return factory.createInv(mapOp(inv.path));

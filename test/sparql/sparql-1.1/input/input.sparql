@@ -1,10 +1,10 @@
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX : <http://example.org/book/>
-PREFIX ns: <http://example.org/ns#>
+PREFIX dc:   <http://purl.org/dc/elements/1.1/> 
+PREFIX :     <http://example.org/book/> 
+PREFIX ns:   <http://example.org/ns#> 
 
-SELECT ?book ?title ?price
+SELECT ?_ ?title ?price
 {
-    &books .
-    ?book dc:title ?title ;
-    ns:price ?price .
+   INPUT &books.
+   ?_ dc:title ?title ;
+         ns:price ?price .
 }
