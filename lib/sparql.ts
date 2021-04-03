@@ -1,4 +1,4 @@
-
+import { isomorphic } from 'rdf-isomorphic';
 import * as Algebra from './algebra';
 import * as RDF from 'rdf-js'
 import Factory from './factory';
@@ -290,10 +290,21 @@ function translateGroup(op: Algebra.Group): any
 
 function translateJoin(op: Algebra.Join): any
 {
-    return Util.flatten([
+    const arr: any[] = Util.flatten([
         translateOperation(op.left),
         translateOperation(op.right)
-    ])
+    ]);
+
+    // Merge bgps
+    // This is possible if one side was a path and the other a bgp for example
+    return arr.reduce((result, val) => {
+        if (val.type !== 'bgp' || result.length == 0 || result[result.length-1].type !== 'bgp') {
+            result.push(val);
+        } else {
+            result[result.length - 1].triples.push(...val.triples);
+        }
+        return result;
+    }, []);
 }
 
 function translateLeftJoin(op: Algebra.LeftJoin): any
@@ -327,6 +338,8 @@ function translateMinus(op: Algebra.Minus): any
     let patterns = translateOperation(op.right);
     if (patterns.type === 'group')
         patterns = patterns.patterns;
+    if (!Array.isArray(patterns))
+        patterns = [ patterns ];
     return Util.flatten([
         translateOperation(op.left),
         {
@@ -764,6 +777,11 @@ function translateDeleteInsert(op: Algebra.DeleteInsert): any
             updates[0].updateType = 'deletewhere';
         else
             updates[0].updateType = 'delete';
+    } else if (!op.insert && op.where && op.where.type === 'bgp') {
+        if (isomorphic(op.delete, (op.where as Algebra.Bgp).patterns)) {
+            delete updates[0].where;
+            updates[0].updateType = 'deletewhere';
+        }
     }
 
     return { prefixes: {}, type: 'update', updates }
