@@ -56,6 +56,11 @@ function translateQuery(sparql: any, quads?: boolean, blankToVariable?: boolean)
     varCount = 0;
     useQuads = quads;
 
+
+    // Assume this is an empty query
+    if (!sparql.type)
+        return factory.createProject(factory.createBgp([]), []);
+
     if (sparql.type !== 'query' && sparql.type !== 'update')
         throw new Error('Translate only works on complete query or update objects.');
 
@@ -353,7 +358,18 @@ function translateGraph(graph: any) : Algebra.Operation
 let typeVals = Object.keys(types).map(key => (<any>types)[key]);
 function recurseGraph(thingy: Algebra.Operation, graph: RDF.Term, replacement?: RDF.Variable) : Algebra.Operation
 {
-    if (thingy.type === types.BGP)
+    if (thingy.type === types.GRAPH)
+    {
+        if (replacement) {
+            // At this point we would lose track of the replacement which would result in incorrect results
+            // This would indicate the library is not being used as intended though
+            throw new Error('Recursing through nested GRAPH statements with a replacement is impossible.');
+        }
+        const graph = thingy as Algebra.Graph;
+        // In case there were nested GRAPH statements that were not recursed yet for some reason
+        thingy = recurseGraph(graph.input, graph.name);
+    }
+    else if (thingy.type === types.BGP)
         (<Algebra.Bgp>thingy).patterns = (<Algebra.Bgp>thingy).patterns.map(quad =>
         {
             if (replacement)
@@ -362,7 +378,8 @@ function recurseGraph(thingy: Algebra.Operation, graph: RDF.Term, replacement?: 
                 if (quad.predicate.equals(graph)) quad.predicate = replacement;
                 if (quad.object.equals(graph)) quad.object = replacement;
             }
-            quad.graph = graph;
+            if (quad.graph.termType === 'DefaultGraph')
+                quad.graph = graph;
             return quad;
         });
     else if (thingy.type === types.PATH)
@@ -373,7 +390,8 @@ function recurseGraph(thingy: Algebra.Operation, graph: RDF.Term, replacement?: 
             if (p.subject.equals(graph)) p.subject = replacement;
             if (p.object.equals(graph))  p.object = replacement;
         }
-        thingy.graph = graph;
+        if (thingy.graph.termType === 'DefaultGraph')
+            thingy.graph = graph;
     }
     // need to replace variables in subqueries should the graph also be a variable of the same name
     // unless the subquery projects that variable
@@ -678,8 +696,8 @@ function translateInsertDelete (thingy: insertDeleteInput): Algebra.Update
     if (!useQuads)
         throw new Error('INSERT/DELETE operations are only supported with quads option enabled');
 
-    let deleteTriples: RDF.BaseQuad[] = [];
-    let insertTriples: RDF.BaseQuad[] = [];
+    let deleteTriples: Algebra.Pattern[] = [];
+    let insertTriples: Algebra.Pattern[] = [];
     let where: Algebra.Operation;
     if (thingy.delete)
         deleteTriples = Util.flatten(thingy.delete.map(input => translateUpdateTriplesBlock(input, thingy.graph)));
@@ -690,13 +708,15 @@ function translateInsertDelete (thingy: insertDeleteInput): Algebra.Update
         if (thingy.using)
             where = factory.createFrom(where, thingy.using.default, thingy.using.named);
         else if (thingy.graph)
-            // this is equivalent
-            where = factory.createFrom(where, [thingy.graph], []);
+            // This is equivalent
+            where = recurseGraph(where, thingy.graph);
+    } else if (thingy.updateType === 'deletewhere' && deleteTriples.length > 0) {
+        where = factory.createBgp(deleteTriples);
     }
 
     return factory.createDeleteInsert(
-        deleteTriples.length > 0 ? deleteTriples.map(translateQuad) : undefined,
-        insertTriples.length > 0 ? insertTriples.map(translateQuad) : undefined,
+        deleteTriples.length > 0 ? deleteTriples : undefined,
+        insertTriples.length > 0 ? insertTriples : undefined,
         where,
     );
 }
@@ -706,15 +726,15 @@ type updateTriplesBlockInput = {
     triples: RDF.BaseQuad[];
     name?: RDF.NamedNode
 };
-// for now, UPDATE parsing will always return quads and have no GRAPH elements
-function translateUpdateTriplesBlock (thingy: updateTriplesBlockInput, graph?: RDF.NamedNode): RDF.BaseQuad[] {
+// UPDATE parsing will always return quads and have no GRAPH elements
+function translateUpdateTriplesBlock (thingy: updateTriplesBlockInput, graph?: RDF.NamedNode): Algebra.Pattern[] {
     let currentGraph = graph;
     if (thingy.type === 'graph')
         currentGraph = thingy.name;
     let currentTriples = thingy.triples;
     if (currentGraph)
         currentTriples = currentTriples.map(triple => Object.assign(triple, { graph: currentGraph }));
-    return currentTriples;
+    return currentTriples.map(translateQuad);
 }
 
 type updateGraphInput = {
@@ -779,6 +799,10 @@ function translateBlankNodesToVariables (res: Algebra.Operation, variables: Set<
         return acc;
     }, {});
     return Util.mapOperation(res, {
+        'deleteinsert': (op: Algebra.DeleteInsert) => {
+            // Only relevant for INSERT operations as others should never contain blank nodes
+            return { result: op, recurse: false };
+        },
         'path': (op: Algebra.Path, factory: Factory) => {
             return {
                 result: factory.createPath(
